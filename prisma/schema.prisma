@@ -12,3 +12,103 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id Int @id
+  firstName String
+  lastName String
+  email String @unique
+  password String
+  status StatusUser @default(Active)
+
+  team Team? @relation(fields: [teamId], references: [id])
+  teamId Int?
+  Task Task[]
+  Role Role?
+}
+
+model Role {
+  id Int @id
+  name String @unique
+  description String
+  user User @relation(fields: [userId], references: [id])
+  userId Int @unique
+}
+
+model Task {
+  id Int @id
+  title String
+  details String
+  startTime DateTime
+  endTime DateTime
+  status Status @default(InProgress)
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Team {
+  id Int @id
+  name String
+  status StatusTeam @default(Active)
+
+  user User []
+  projectId Int
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Project {
+  id Int @id
+  title String @unique
+  description String
+  objective String
+  startDate DateTime
+  endDate DateTime
+  status Status @default(InProgress)
+
+  team Team[]
+  resource Resource[]
+}
+
+model Resource {
+  id Int @id
+  name String 
+  startTime DateTime
+  endTime  DateTime
+  status StatusResource @default(Available)
+
+  project Project[]
+  typeResource TypeResource @relation(fields: [typeResoureId], references: [id])
+  typeResoureId Int
+}
+
+model TypeResource {
+  id Int @id
+  name String @unique
+  description String
+
+  Resource Resource[]
+}
+
+enum Status {
+Done
+InProgress
+NotStarted
+Deleted
+}
+
+enum StatusUser {
+Active
+InATeam
+Deleted
+}
+
+enum StatusTeam {
+Active
+Deleted
+}
+
+enum StatusResource {
+Available
+Ocupied
+Deleted
+}

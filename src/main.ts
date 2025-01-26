@@ -9,7 +9,7 @@ async function bootstrap() {
     .setTitle('Project Manager REST API')
     .setDescription('API that manage projects task and teams')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('Projects')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

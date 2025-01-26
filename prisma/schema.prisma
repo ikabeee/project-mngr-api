@@ -14,15 +14,16 @@ datasource db {
 }
 
 model User {
-  id        Int        @id
-  firstName String
-  lastName  String
-  username  String     @unique
-  email     String     @unique
-  password  String
-  hasTeam   Boolean    @default(false)
-  status    StatusUser @default(Active)
-  role      Role       @default(Guest)
+  id            Int        @id
+  firstName     String
+  lastName      String
+  username      String     @unique
+  email         String     @unique
+  password      String
+  payrollNumber String?    @unique
+  hasTeam       Boolean    @default(false)
+  status        StatusUser @default(Active)
+  role          Role       @default(Guest)
 
   team   Team?  @relation(fields: [teamId], references: [id])
   teamId Int?
@@ -30,6 +31,9 @@ model User {
   Role   Role?
 }
 
+/**
+ * Commented because I used an enum for specify roles
+ */
 // model Role {
 //   id Int @id
 //   name String @unique
@@ -44,7 +48,7 @@ model Task {
   details   String
   startTime DateTime
   endTime   DateTime
-  status    Status   @default(InProgress)
+  status    Status   @default(Pending)
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
 }
@@ -96,12 +100,15 @@ enum Status {
   Done
   InProgress
   NotStarted
+  Pending
+  Inactive
   Deleted
 }
 
 enum Role {
   Admin
   Leader
+  Moderator
   Collaborator
   Guest
 }
@@ -116,11 +123,13 @@ enum StatusUser {
 enum StatusTeam {
   Active
   Suspended
+  Inactive
   Deleted
 }
 
 enum StatusResource {
   Available
   Occupied
+  Inactive
   Deleted
 }

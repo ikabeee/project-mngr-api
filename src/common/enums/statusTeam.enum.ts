@@ -1,4 +1,4 @@
-export enum statusUser {
+export enum statusTeam {
   ACTIVE = 'Active',
   INACTIVE = 'Inactive',
   SUSPENDED = 'Suspended',

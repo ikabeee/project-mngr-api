@@ -14,101 +14,121 @@ datasource db {
 }
 
 model User {
-  id Int @id
-  firstName String
-  lastName String
-  email String @unique
-  password String
-  status StatusUser @default(Active)
+  id            Int        @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  username      String     @unique
+  email         String     @unique
+  password      String
+  payrollNumber String?    @unique
+  hasTeam       Boolean    @default(false)
+  status        StatusUser @default(Active)
+  role          Role       @default(Guest)
 
-  team Team? @relation(fields: [teamId], references: [id])
+  team   Team?  @relation(fields: [teamId], references: [id])
   teamId Int?
-  Task Task[]
-  Role Role?
+  task   Task[]
 }
 
-model Role {
-  id Int @id
-  name String @unique
-  description String
-  user User @relation(fields: [userId], references: [id])
-  userId Int @unique
-}
+/**
+ * Commented because I used an enum for specify roles
+ */
+// model Role {
+//   id Int @id
+//   name String @unique
+//   description String
+//   user User @relation(fields: [userId], references: [id])
+//   userId Int @unique
+// }
 
 model Task {
-  id Int @id
-  title String
-  details String
+  id        Int      @id
+  title     String
+  details   String
   startTime DateTime
-  endTime DateTime
-  status Status @default(InProgress)
-  user User @relation(fields: [userId], references: [id])
-  userId Int
+  endTime   DateTime
+  status    Status   @default(Pending)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 model Team {
-  id Int @id
-  name String
+  id     Int        @id
+  name   String
   status StatusTeam @default(Active)
 
-  user User []
+  user      User[]
   projectId Int
-  project Project @relation(fields: [projectId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
 }
 
 model Project {
-  id Int @id
-  title String @unique
+  id          Int      @id
+  title       String   @unique
   description String
-  objective String
-  startDate DateTime
-  endDate DateTime
-  status Status @default(InProgress)
+  objective   String
+  startDate   DateTime
+  endDate     DateTime
+  status      Status   @default(InProgress)
 
-  team Team[]
+  team     Team[]
   resource Resource[]
 }
 
 model Resource {
-  id Int @id
-  name String 
+  id        Int            @id
+  name      String
   startTime DateTime
-  endTime  DateTime
-  status StatusResource @default(Available)
+  endTime   DateTime
+  status    StatusResource @default(Available)
 
-  project Project[]
-  typeResource TypeResource @relation(fields: [typeResoureId], references: [id])
+  project       Project[]
+  typeResource  TypeResource @relation(fields: [typeResoureId], references: [id])
   typeResoureId Int
 }
 
 model TypeResource {
-  id Int @id
-  name String @unique
+  id          Int    @id
+  name        String @unique
   description String
 
   Resource Resource[]
 }
 
 enum Status {
-Done
-InProgress
-NotStarted
-Deleted
+  Done
+  InProgress
+  NotStarted
+  Pending
+  Inactive
+  Deleted
+}
+
+enum Role {
+  Admin
+  Leader
+  Moderator
+  Collaborator
+  Guest
 }
 
 enum StatusUser {
-Active
-InATeam
-Deleted
+  Active
+  Suspended
+  Inactive
+  Deleted
 }
 
 enum StatusTeam {
-Active
-Deleted
+  Active
+  Suspended
+  Inactive
+  Deleted
 }
 
 enum StatusResource {
-Available
-Ocupied
-Deleted
+  Available
+  Occupied
+  Inactive
+  Deleted
 }

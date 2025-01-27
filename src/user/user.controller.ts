@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,7 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @UseGuards(UseGuards)
+  //Only admins and moderators could create users
   @Post('create')
   create(@Body() newUser: CreateUserDto) {
     return this.userService.create(newUser);

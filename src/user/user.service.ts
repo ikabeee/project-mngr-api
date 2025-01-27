@@ -2,13 +2,13 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-// import { status } from 'src/common/enums/status.enum';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -38,28 +38,52 @@ export class UserService {
     }
   }
 
-  // async findAll() {
-  //   try {
-  //   } catch (error) {}
-  // }
+  async findOne(id: number): Promise<User> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        include: { team: true, task: true },
+      });
+      if (!user) {
+        throw new NotFoundException(`USER_WITH_ID_${id}_NOT_FOUND`);
+      }
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+    }
+  }
 
-  // async findOne(id: number) {
-  //   try {
-  //   } catch (error) {}
-  // }
+  async findAll(): Promise<User[]> {
+    try {
+      const users = await this.prisma.user.findMany({
+        include: { team: true, task: true },
+      });
+      if (users.length === 0 || !users) {
+        throw new NotFoundException(`NO_USERS_FOUND`);
+      }
+      return users;
+    } catch (error) {
+      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+    }
+  }
 
-  // async update(id: number, user: UpdateUserDto) {
-  //   try {
-  //   } catch (error) {}
-  // }
-
-  // async remove(id: number) {
-  //   try {
-  //   } catch (error) {}
-  // }
-
-  // async changeStatus(status: status) {
-  //   try {
-  //   } catch (error) {}
-  // }
+  async update(id: number, user: UpdateUserDto): Promise<User> {
+    try {
+      const checkUser = await this.prisma.user.findFirst({ where: { id } });
+      if (!checkUser) {
+        throw new NotFoundException(`USER_WITH_ID_${id}_NOT_FOUND`);
+      }
+      const userUpdated = await this.prisma.user.update({
+        where: { id },
+        data: { ...user },
+        include: {
+          team: true,
+          task: true,
+        },
+      });
+      return userUpdated;
+    } catch (error) {
+      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+    }
+  }
 }

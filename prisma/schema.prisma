@@ -27,7 +27,7 @@ model User {
 
   team   Team?  @relation(fields: [teamId], references: [id])
   teamId Int?
-  Task   Task[]
+  task   Task[]
 }
 
 /**

@@ -1,6 +1,16 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Put,
+  Patch,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { statusUser } from 'src/common/enums/statusUser.enum';
+import { UpdateUserDto } from './dto/update-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
@@ -8,10 +18,22 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
   //Only admins and moderators could create users
   @Post('create')
-  create(@Body() newUser: CreateUserDto) {
+  async create(@Body() newUser: CreateUserDto) {
     return this.userService.create(newUser);
   }
 
+  @Put('changeStatus/:id')
+  async changeStatus(
+    @Param('id', ParseIntPipe) id: string,
+    @Body() status: statusUser,
+  ) {
+    return this.userService.changeStatus(+id, status);
+  }
+
+  @Patch('edit/:id')
+  update(@Param('id') id: string, @Body() updateUser: UpdateUserDto) {
+    return this.userService.update(+id, updateUser);
+  }
   // @Get('/all')
   // findAll() {
   //   return this.userService.findAll();
@@ -21,12 +43,6 @@ export class UserController {
   // findOne(@Param('id') id: string) {
   //   return this.userService.findOne(+id);
   // }
-
-  // @Patch('edit/:id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
-
   // @Delete('delete/:id')
   // remove(@Param('id') id: string) {
   //   return this.userService.remove(+id);

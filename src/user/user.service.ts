@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -9,6 +10,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { statusUser } from 'src/common/enums/statusUser.enum';
 
 @Injectable()
 export class UserService {
@@ -34,6 +36,9 @@ export class UserService {
       const newUser = await this.prisma.user.create({ data: { ...user } });
       return newUser;
     } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
       throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
     }
   }
@@ -49,7 +54,10 @@ export class UserService {
       }
       return user;
     } catch (error) {
-      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('UNEXPECTED_ERROR');
     }
   }
 
@@ -63,7 +71,10 @@ export class UserService {
       }
       return users;
     } catch (error) {
-      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('UNEXPECTED_ERROR');
     }
   }
 
@@ -83,7 +94,40 @@ export class UserService {
       });
       return userUpdated;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+    }
+  }
+
+  async changeStatus(id: number, status: statusUser): Promise<User> {
+    try {
+      if (!status) {
+        throw new BadRequestException('STATUS_MISSING');
+      }
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new NotFoundException(`USER_WITH_ID_${id}_NOT_FOUND`);
+      }
+      const statusUpdated = await this.prisma.user.update({
+        where: { id },
+        data: { status },
+        include: { team: true, task: true },
+      });
+
+      return statusUpdated;
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`UNEXPECTED_ERROR_${error}`);
     }
   }
 }

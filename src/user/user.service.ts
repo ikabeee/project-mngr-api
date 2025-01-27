@@ -39,7 +39,7 @@ export class UserService {
       if (error instanceof ConflictException) {
         throw error;
       }
-      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+      throw new InternalServerErrorException('UNEXPECTED_ERROR');
     }
   }
 
@@ -97,7 +97,7 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('UNEXPECTED_ERROR', error);
+      throw new InternalServerErrorException('UNEXPECTED_ERROR');
     }
   }
 

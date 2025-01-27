@@ -50,7 +50,7 @@ export class CreateUserDto {
 
   @ApiProperty({ enum: ['Active', 'Inactive', 'Suspended', 'Deleted'] })
   @IsNotEmpty()
-  @IsEnum(statusUser)
+  @IsEnum(statusUser, { message: 'Invalid status provided' })
   status: statusUser;
 
   @ApiProperty({

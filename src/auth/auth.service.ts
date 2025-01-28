@@ -1,9 +1,9 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -32,7 +32,7 @@ export class AuthService {
       }
       const checkPassword = await bcrypt.compare(password, findUser.password);
       if (!checkPassword) {
-        throw new ForbiddenException('PASSWORD_OR_EMAIL_INCORRECT');
+        throw new UnauthorizedException('PASSWORD_OR_EMAIL_INCORRECT');
       }
       const payload = { id: findUser.id, name: findUser.firstName };
       const token = this.jwtService.sign(payload);
@@ -42,7 +42,7 @@ export class AuthService {
       if (
         error instanceof BadRequestException ||
         error instanceof NotFoundException ||
-        error instanceof ForbiddenException
+        error instanceof UnauthorizedException
       ) {
         throw error;
       }

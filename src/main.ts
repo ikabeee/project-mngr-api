@@ -13,6 +13,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Project Manager REST API')
     .setDescription('API that manage projects task and teams')
     .setVersion('1.0')

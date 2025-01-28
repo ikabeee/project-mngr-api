@@ -10,6 +10,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('singIn')
   async login(@Body() user: LoginAuthDto) {
-    return this.authService.SingIn(user);
+    return this.authService.LogIn(user);
   }
 }

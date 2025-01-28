@@ -16,7 +16,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
-  async SingIn(input: LoginAuthDto) {
+  async LogIn(input: LoginAuthDto) {
     try {
       const { email, payrollNumber, password } = input;
       if (!email && !payrollNumber) {
@@ -30,7 +30,7 @@ export class AuthService {
       if (!findUser) {
         throw new NotFoundException(`USER_NOT_FOUND`);
       }
-      const checkPassword = await bcrypt.compare(password, input.password);
+      const checkPassword = await bcrypt.compare(password, findUser.password);
       if (!checkPassword) {
         throw new ForbiddenException('PASSWORD_OR_EMAIL_INCORRECT');
       }

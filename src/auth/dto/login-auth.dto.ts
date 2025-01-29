@@ -17,4 +17,9 @@ export class LoginAuthDto {
   @IsString()
   @ApiProperty()
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty()
+  securityAnswer?: string;
 }

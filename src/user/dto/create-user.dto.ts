@@ -44,6 +44,16 @@ export class CreateUserDto {
   payrollNumber: string;
 
   @ApiProperty()
+  @IsOptional()
+  @IsString()
+  security_question: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  security_answer: string;
+
+  @ApiProperty()
   @IsNotEmpty()
   @IsBoolean()
   hasTeam: boolean;

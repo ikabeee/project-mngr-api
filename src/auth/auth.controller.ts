@@ -31,7 +31,7 @@ export class AuthController {
     response.cookie('jwt', token, {
       httpOnly: true,
       secure: false,
-      sameSite: 'lax',
+      sameSite: 'lax', //CSRF protection
       maxAge: 8 * 60 * 60 * 1000,
     });
     return { user: UserData };

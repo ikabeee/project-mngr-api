@@ -8,7 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { role } from 'src/common/enums/role.enum';
+import { Role } from 'src/common/enums/role.enum';
 import { statusUser } from 'src/common/enums/statusUser.enum';
 
 export class CreateUserDto {
@@ -57,8 +57,8 @@ export class CreateUserDto {
     enum: ['Admin', 'Leader', 'Moderator', 'Collaborator', 'Guest'],
   })
   @IsNotEmpty()
-  @IsEnum(role)
-  role: role;
+  @IsEnum(Role)
+  role: Role;
 
   @ApiProperty()
   @IsNumber()

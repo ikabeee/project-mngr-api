@@ -29,6 +29,6 @@ export class UserGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException('USER_NOT_AUTHENTICATED');
     }
-    return requiredRoles.some((role) => user.roles?.includes(role));
+    return requiredRoles.some((role) => user.role?.includes(role));
   }
 }

@@ -27,14 +27,33 @@ export class AuthController {
     @Body() user: LoginAuthDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { token, user: UserData } = await this.authService.login(user);
+    const { status, userId, question } = await this.authService.login(user);
+
+    return {
+      status,
+      userId,
+      question,
+    };
+  }
+
+  @Post('validate-security-answer')
+  @HttpCode(HttpStatus.OK)
+  async validateSecurityAnswer(
+    @Body() body: { userId: number; securityAnswer: string },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { userId, securityAnswer } = body;
+
+    const { token } = await this.authService.validateSecurityAnswer(userId, securityAnswer);
+
     response.cookie('jwt', token, {
       httpOnly: true,
       secure: false,
-      sameSite: 'lax', //CSRF protection
+      sameSite: 'lax',
       maxAge: 8 * 60 * 60 * 1000,
     });
-    return { user: UserData };
+
+    return { token };
   }
 
   @Get('profile')

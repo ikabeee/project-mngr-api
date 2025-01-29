@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -29,6 +30,6 @@ export class UserGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException('USER_NOT_AUTHENTICATED');
     }
-    return requiredRoles.some((role) => user.role?.includes(role));
+    return requiredRoles.includes(user.role);
   }
 }

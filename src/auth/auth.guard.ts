@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromCookies(request);
+    const token = request.cookies['jwt'];
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -37,14 +36,10 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.secret,
       });
-      request['user'] = payload;
+      request.user = payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('INVALID_TOKEN');
     }
     return true;
-  }
-
-  private extractTokenFromCookies(request: Request): string | undefined {
-    return request.cookies?.jwt;
   }
 }

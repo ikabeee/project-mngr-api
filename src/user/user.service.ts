@@ -130,7 +130,7 @@ export class UserService {
       throw new InternalServerErrorException(`UNEXPECTED_ERROR_${error}`);
     }
   }
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<string> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
@@ -138,7 +138,8 @@ export class UserService {
       if (!user) {
         throw new NotFoundException(`USER_WITH_ID_${id}_NOT_FOUND`);
       }
-      await this.prisma.user.delete({ where: { id } });
+      const userDeleted = await this.prisma.user.delete({ where: { id } });
+      return `USER_DELETED_${userDeleted.id}`;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

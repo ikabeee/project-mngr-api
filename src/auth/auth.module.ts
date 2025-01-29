@@ -3,10 +3,21 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   imports: [
     PrismaModule,
     JwtModule.register({
@@ -14,6 +25,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '8h' },
     }),
+    PassportModule,
   ],
   exports: [AuthService],
 })

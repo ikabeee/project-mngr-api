@@ -1,15 +1,44 @@
-import { Controller, HttpCode, HttpStatus } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Post, Body } from '@nestjs/common';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { Response } from 'express';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from './../common/decorators/public.decorator';
 
+@ApiBearerAuth()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('singIn')
-  async login(@Body() user: LoginAuthDto) {
-    return this.authService.SingIn(user);
+  @Post('login')
+  async login(
+    @Body() user: LoginAuthDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { token, user: UserData } = await this.authService.login(user);
+    response.cookie('jwt', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax', //CSRF protection
+      maxAge: 8 * 60 * 60 * 1000,
+    });
+    return { user: UserData };
+  }
+
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }

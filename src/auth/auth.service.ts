@@ -1,9 +1,9 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -16,7 +16,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
-  async SingIn(input: LoginAuthDto) {
+  async login(input: LoginAuthDto) {
     try {
       const { email, payrollNumber, password } = input;
       if (!email && !payrollNumber) {
@@ -24,25 +24,28 @@ export class AuthService {
       }
       const findUser = await this.prisma.user.findFirst({
         where: {
-          OR: [{ email: input.email, payrollNumber: input.payrollNumber }],
+          OR: [{ email: input.email }, { payrollNumber: input.payrollNumber }],
         },
       });
       if (!findUser) {
         throw new NotFoundException(`USER_NOT_FOUND`);
       }
-      const checkPassword = await bcrypt.compare(password, input.password);
-      if (!checkPassword) {
-        throw new ForbiddenException('PASSWORD_OR_EMAIL_INCORRECT');
+      const isPasswordValid = await bcrypt.compare(password, findUser.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('INCORRECT_PASSWORD');
       }
-      const payload = { id: findUser.id, name: findUser.firstName };
+      const payload = {
+        id: findUser.id,
+        name: findUser.firstName,
+        role: findUser.role,
+      };
       const token = this.jwtService.sign(payload);
-      const login = { user: findUser, token };
-      return login;
+      return { user: findUser, token };
     } catch (error) {
       if (
         error instanceof BadRequestException ||
         error instanceof NotFoundException ||
-        error instanceof ForbiddenException
+        error instanceof UnauthorizedException
       ) {
         throw error;
       }

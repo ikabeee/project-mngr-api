@@ -41,4 +41,15 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('jwt', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+    });
+    return { message: 'Successful logout' };
+  }
 }

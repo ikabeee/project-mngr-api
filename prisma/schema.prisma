@@ -21,6 +21,8 @@ model User {
   email         String     @unique
   password      String
   payrollNumber String?    @unique
+  security_question String
+  security_answer String
   hasTeam       Boolean    @default(false)
   status        StatusUser @default(Active)
   role          Role       @default(Guest)

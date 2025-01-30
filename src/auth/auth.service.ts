@@ -22,6 +22,9 @@ export class AuthService {
       if (!email && !payrollNumber) {
         throw new BadRequestException('EMAIL_OR_PAYROLLNUMBER_MISSING');
       }
+      if (!password) {
+        throw new BadRequestException('PASSWORD_MISSING');
+      }
       const findUser = await this.prisma.user.findFirst({
         where: {
           OR: [{ email: input.email }, { payrollNumber: input.payrollNumber }],
@@ -34,19 +37,52 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new UnauthorizedException('INCORRECT_PASSWORD');
       }
-      const payload = {
-        id: findUser.id,
-        name: findUser.firstName,
-        role: findUser.role,
+       return {
+        status: 'WAITING_FOR_SECURITY_QUESTION',
+        userId: findUser.id,
+        question: findUser.security_question,
       };
-      const token = this.jwtService.sign(payload);
-      return { user: findUser, token };
     } catch (error) {
       if (
         error instanceof BadRequestException ||
         error instanceof NotFoundException ||
         error instanceof UnauthorizedException
       ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('UNEXPECTED_ERROR');
+    }
+  }
+
+  async validateSecurityAnswer(userId: number, securityAnswer: string) {
+    try {
+      const findUser = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!findUser) {
+        throw new NotFoundException('USER_NOT_FOUND');
+      }
+
+      const isSecurityAnswerValid = await bcrypt.compare(
+        securityAnswer,
+        findUser.security_answer, 
+      );
+
+      if (!isSecurityAnswerValid) {
+        throw new UnauthorizedException('INCORRECT_SECURITY_ANSWER');
+      }
+
+      const payload = {
+        id: findUser.id,
+        name: findUser.firstName,
+        role: findUser.role,
+      };
+      const token = this.jwtService.sign(payload);
+
+      return { token };
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
         throw error;
       }
       throw new InternalServerErrorException('UNEXPECTED_ERROR');

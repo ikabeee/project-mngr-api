@@ -26,4 +26,9 @@ export class LoginAuthDto {
   @ApiProperty()
   @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty()
+  securityAnswer?: string;
 }

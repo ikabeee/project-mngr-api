@@ -53,11 +53,13 @@ export class CreateUserDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
+  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
   security_question: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
+  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
   security_answer: string;
 
   @ApiProperty()

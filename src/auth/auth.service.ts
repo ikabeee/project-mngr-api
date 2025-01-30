@@ -56,36 +56,64 @@ export class AuthService {
 
   async validateSecurityAnswer(userId: number, securityAnswer: string) {
     try {
+      console.log("Validating security answer for user:", userId)
+
       const findUser = await this.prisma.user.findUnique({
         where: { id: userId },
-      });
+      })
 
       if (!findUser) {
-        throw new NotFoundException('USER_NOT_FOUND');
+        console.log("User not found:", userId)
+        throw new NotFoundException("USER_NOT_FOUND")
       }
 
-      const isSecurityAnswerValid = await bcrypt.compare(
-        securityAnswer,
-        findUser.security_answer, 
-      );
+      console.log("User found:", findUser.id)
+      console.log("Stored security answer:", findUser.security_answer)
+      console.log("Provided security answer:", securityAnswer)
+
+      // Check if the stored security answer is already hashed
+      const isAlreadyHashed = /^\$2[ayb]\$.{56}$/.test(findUser.security_answer)
+      console.log("Is security answer already hashed:", isAlreadyHashed)
+
+      let isSecurityAnswerValid: boolean
+
+      if (isAlreadyHashed) {
+        isSecurityAnswerValid = await bcrypt.compare(securityAnswer, findUser.security_answer)
+      } else {
+        // If not hashed, compare directly (not recommended for production)
+        isSecurityAnswerValid = securityAnswer === findUser.security_answer
+
+        if (isSecurityAnswerValid) {
+          // Hash the security answer for future use
+          const hashedAnswer = await bcrypt.hash(securityAnswer, 10)
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: { security_answer: hashedAnswer },
+          })
+          console.log("Security answer hashed and updated")
+        }
+      }
+
+      console.log("Is security answer valid:", isSecurityAnswerValid)
 
       if (!isSecurityAnswerValid) {
-        throw new UnauthorizedException('INCORRECT_SECURITY_ANSWER');
+        throw new UnauthorizedException("INCORRECT_SECURITY_ANSWER")
       }
 
       const payload = {
         id: findUser.id,
         name: findUser.firstName,
         role: findUser.role,
-      };
-      const token = this.jwtService.sign(payload);
-
-      return { token };
-    } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
-        throw error;
       }
-      throw new InternalServerErrorException('UNEXPECTED_ERROR');
+      const token = this.jwtService.sign(payload)
+
+      return { token }
+    } catch (error) {
+      console.error("Error in validateSecurityAnswer:", error)
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+        throw error
+      }
+      throw new InternalServerErrorException("UNEXPECTED_ERROR: " + error.message)
     }
   }
 }

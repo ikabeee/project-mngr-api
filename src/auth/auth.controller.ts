@@ -36,6 +36,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post('validate-security-answer')
   @HttpCode(HttpStatus.OK)
   async validateSecurityAnswer(

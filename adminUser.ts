@@ -5,14 +5,14 @@ const prisma = new PrismaClient();
 
 const createAdminUser = async () => {
   const userDto = {
-    firstName: 'Admin',
+    firstName: 'Collaborator',
     lastName: 'User',
-    username: 'admin123',
-    email: 'admin@example.com',
-    password: 'securePassword123', // Asegúrate de encriptar la contraseña
+    username: 'collab',
+    email: 'collaborator@gmail.com',
+    password: '12345', // Asegúrate de encriptar la contraseña
     hasTeam: false,
     status: StatusUser.Active, // Usar el enum de StatusUser
-    role: Role.Admin, // Usar el enum de Role
+    role: Role.Collaborator, // Usar el enum de Role
     security_answer : "20",
     security_question : "Cuantos años tienes?",
     teamId: null, // Si el usuario no tiene equipo, se puede dejar nulo
@@ -21,7 +21,9 @@ const createAdminUser = async () => {
   try {
     // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(userDto.password, 10);
+    const hashedAnswer = await bcrypt.hash(userDto.security_answer, 10);
 
+    
     // Crear el usuario administrador en la base de datos
     const user = await prisma.user.create({
       data: {
@@ -33,7 +35,7 @@ const createAdminUser = async () => {
         hasTeam: userDto.hasTeam,
         status: userDto.status,
         security_question : userDto.security_question,
-        security_answer : userDto.security_answer,
+        security_answer : hashedAnswer,
         role: userDto.role,
         teamId: userDto.teamId,
       },

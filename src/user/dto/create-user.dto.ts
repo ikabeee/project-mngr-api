@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
@@ -12,54 +13,81 @@ import {
 import { Role } from 'src/common/enums/role.enum';
 import { statusUser } from 'src/common/enums/statusUser.enum';
 
+// Patrón actualizado: permite letras (incluyendo acentuadas), dígitos, espacios y caracteres especiales
+const allowedPattern = /^[a-zA-ZÀ-ÿ0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+
 export class CreateUserDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'El nombre solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   firstName: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'El apellido solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   lastName: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message:
+      'El nombre de usuario solo puede contener letras, números y guiones bajos',
+  })
   username: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'El correo electrónico solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   email: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'La contraseña solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   password: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'El número de nómina solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   payrollNumber: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(/^[a-zA-ZÀ-ÿ0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/¿?]*$/, {
+    message:
+      'La pregunta de seguridad solo puede contener letras, números, espacios y caracteres especiales permitidos, incluyendo signos de interrogación',
+  })
   security_question: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/)
+  @Matches(allowedPattern, {
+    message:
+      'La respuesta de seguridad solo puede contener letras, números, espacios y caracteres especiales permitidos',
+  })
   security_answer: string;
 
   @ApiProperty()
